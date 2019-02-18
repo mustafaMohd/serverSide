@@ -1,22 +1,29 @@
 const express = require('express');
-const asyncHandler = require('express-async-handler')
+
+// const asyncHandler = require('express-async-handler')
+
 const router = express.Router();
 const passport = require('passport');
-
+const passportSignIn = passport.authenticate('local', { session: false });
+const passportJWT = passport.authenticate('jwt', { session: false });
 
 const authService = require('./auth.service');
 const jwt = require('../helpers/jwt');
 // routes
 
-router.post('/register', register);
+router.post('/register', register );
 
-router.post('/authenticate', authenticate);
+router.post('/authenticate',passportSignIn, authenticate);
 
-router.get('/current', jwt(), getCurrent);
+
+
+router.get('/current', passportJWT, getCurrent);
 
 
 
 module.exports = router;
+
+
 
 
 
@@ -33,9 +40,9 @@ async function authenticate(req, res, next) {
 
 async function register(req, res, next) {
     console.log(req.body)
-    await authService.create(req.body)
+   await authService.create(req.body)
         .then(user => user ?
-            res.status(201).json({}) : res.status(400).json({
+            res.status(201).json(user) : res.status(400).json({
                 message: ` Registeration Failed`
             }))
         .catch(err => {
@@ -46,7 +53,7 @@ async function register(req, res, next) {
 
 
 async function getCurrent(req, res, next) {
-    authService.getById(req.user.sub)
+ await authService.getById(req.user.sub)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }

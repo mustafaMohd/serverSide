@@ -6,21 +6,22 @@ const bodyParser = require('body-parser');
 const jwt = require('./helpers/jwt');
 const errorHandler = require('./helpers/error-handler');
 const helmet = require('helmet');
+const passport=require('passport');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(cors());
-
+app.use(passport.initialize());
 // use JWT auth to secure the api
 // app.use(jwt());
 
 // api routes
 
 // app.use('/post', require('./users/user.controller'));
+app.use('/auth', require('./_auth/auth.controller'));
 
-app.use('/users', require('./users/user.controller'));
-
+app.use('/users', require('./_users/user.controller'));
 
 // global error handler
 app.use(errorHandler);

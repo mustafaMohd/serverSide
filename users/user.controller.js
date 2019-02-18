@@ -14,13 +14,13 @@ router.delete('/:id',jwt(), _delete);
 module.exports = router;
  
 async function authenticate(req, res, next) {
-    userService.authenticate(req.body)
+    await userService.authenticate(req.body)
         .then(user => user 
             ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
         .catch(err => next(err));
 }
-function register(req, res, next) {
-    userService.create(req.body)
+async function register(req, res, next) {
+   await userService.create(req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
