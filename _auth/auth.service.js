@@ -16,53 +16,89 @@ module.exports = {
     delete: _delete
 };
 
+async function create(userParam) {
+    // validate
+
+    if (await User.findOne({
+            "local.email": userParam.email
+        })) {
+        throw 'Email "' + userParam.email + '"  already exists';
+    }
+
+    const newUser = new User({
+        method: 'local',
+        local: {
+            email: userParam.email,
+        }
+
+    });
 
 
+    // hash password
+    if (userParam.password) {
+        newUser.local.password = bcrypt.hashSync(userParam.password, 10);
+        delete userParam.password;
+   
+    }
 
-  async function  googleOAuth(req, res, next)  {
-    // Generate token
-    var user =req.user;
-    const token = jwt.sign({ sub: user.id }, config.JWT_SECRET);
-        return {
-            token
-        };
-
-  }
- 
-  async function  facebookOAuth (req, res, next) {
-    // Generate token
-    var user =req.user;
-        
-    const token = jwt.sign({ sub: user.id }, config.JWT_SECRET);
+    // save user
+    await newUser.save();
     
-        
+    delete newUser.local.password;
+    console.log(newUser);
+   
+   
+    const { local :{password}, ...userWithoutPassword } = newUser.toObject();
+
+    console.log(userWithoutPassword);
+
+
+
+    const token = jwt.sign({
+        sub: newUser.id
+    }, config.JWT_SECRET);
+    return {
+        userWithoutPassword,
+        token
+    };
+}
+
+
+
+
+
+
+
+
+
+
+
+async function authenticate(user) {
+    
+   
+
+    const token = jwt.sign({
+        sub: user.id
+    }, config.JWT_SECRET);
+
+    
+    const { local :{password}, ...userWithoutPassword } = user.toObject();
+
+    console.log(userWithoutPassword);
     
     return {
+        ...userWithoutPassword,
         token
-        };
-  }
-
-  
- 
-  async function authenticate(req, res, next) {
-    const user = req.user;
-        
-    const token = jwt.sign({ sub: user.id }, config.JWT_SECRET); 
-        const { password, ...userWithoutPassword } = user.local.toObject();
-   
-        return {
-            ...userWithoutPassword,
-            token
-        };
-    }
+    };
+}
 
 
 // async function authenticate({ email, password }) {
 //     const user = await User.findOne({ "local.email": email });
-    
+
 //     if (user && bcrypt.compareSync(password, user.local.password)) {
 //         const { password, ...userWithoutPassword } = user.local.toObject();
-        
+
 //         const token = jwt.sign({ sub: user.id }, config.JWT_SECRET);
 //         return {
 //             ...userWithoutPassword,
@@ -72,56 +108,50 @@ module.exports = {
 // }
 
 
-async function create(userParam) {
-    // validate
-    
-    if (await User.findOne({
-        "local.email": userParam.email
-        })) {
-        throw 'Email "' + userParam.email + '"  already exists';
-    }
-
-    const user = new User({
-        method: 'local',
-      local: {
-        email: userParam.email, 
-       }
-    
-    });
-
-
-    // hash password
-    if (userParam.password) {
-        user.local.password = bcrypt.hashSync(userParam.password, 10);
-        delete userParam.password;
-    
-    }
-
-    // save user
-    await user.save();
-   const { password, ...userWithoutPassword } = user.local.toObject();
-        
-        const token = jwt.sign({ sub: user.id }, config.JWT_SECRET);
-        return {
-            ...userWithoutPassword,
-            token
-        };
-}
-
-
-
-
 
 
 async function getById(id) {
     return await User.findById(id).select('-hash');
 }
+
+async function googleOAuth(req, res, next) {
+    // Generate token
+    var user = req.user;
+    const token = jwt.sign({
+        sub: user.id
+    }, config.JWT_SECRET);
+    return {
+        token
+    };
+
+}
+
+async function facebookOAuth(req, res, next) {
+    // Generate token
+    var user = req.user;
+
+    const token = jwt.sign({
+        sub: user.id
+    }, config.JWT_SECRET);
+
+
+
+    return {
+        token
+    };
+}
+
+
+
+
 async function update(id, userParam) {
     const user = await User.findById(id);
 
     // validate
     if (!user) throw 'User not found';
-    if (user.email !== userParam.email && await User.findOne({ email: userParam.email })) {
+    if (user.email !== userParam.email && await User.findOne({
+            email: userParam.email
+        })) {
         throw 'Email "' + userParam.email + '" is already taken';
     }
 
