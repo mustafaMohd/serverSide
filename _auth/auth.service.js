@@ -38,56 +38,49 @@ async function create(userParam) {
     if (userParam.password) {
         newUser.local.password = bcrypt.hashSync(userParam.password, 10);
         delete userParam.password;
-   
+
     }
 
     // save user
-    await newUser.save();
-    
-    delete newUser.local.password;
-    console.log(newUser);
-   
-   
-    const { local :{password}, ...userWithoutPassword } = newUser.toObject();
+    let user=await newUser.save();
 
-    console.log(userWithoutPassword);
+    // console.log(`${user}  new registered user`);
+
+
+    // const {
+    //     local: {   password },
+    //     ...userWithoutPassword
+    // } = user;
+    user = user.toObject();
+
+    delete user.local.password;
+
+   
 
 
 
     const token = jwt.sign({
-        sub: newUser.id
+        sub: user.id
     }, config.JWT_SECRET);
     return {
-        userWithoutPassword,
+        user,
         token
     };
 }
 
 
-
-
-
-
-
-
-
-
-
 async function authenticate(user) {
-    
-   
 
     const token = jwt.sign({
         sub: user.id
     }, config.JWT_SECRET);
 
-    
-    const { local :{password}, ...userWithoutPassword } = user.toObject();
 
-    console.log(userWithoutPassword);
-    
+   
+user= user.toObject();
+delete user.local.password;
     return {
-        ...userWithoutPassword,
+        user,
         token
     };
 }
