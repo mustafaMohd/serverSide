@@ -1,40 +1,76 @@
-
-
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-// const passportLocalMongoose =require( 'passport-local-mongoose') ;
 
 const userSchema = new Schema({
-    email: { type: String,required: true, 
-        trim: true ,unique: true,
-        match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-  
-
-     },
-     facebookProvider: {
-        type: {
-              id: String,
-              token: String
-        },
-        select: false
+  method: {
+    type: String,
+    enum: ['local', 'google', 'facebook'],
+    required: true
   },
-
-    //  provider: { type: String },
-     
-
-    // profile_picture: { type: String },
-
-    hash: { type: String, required: true },
-    email_verified: { type:Boolean },
-        
-    createdDate: { type: Date, default: Date.now }
+  local: {
+    email: {
+      type: String,
+      lowercase: true
+    },
+    password: {
+      type: String
+    }
+  },
+  google: {
+    id: {
+      type: String
+    },
+    email: {
+      type: String,
+      lowercase: true
+    }
+  },
+  facebook: {
+    id: {
+      type: String
+    },
+    email: {
+      type: String,
+      lowercase: true
+    }
+  }
 });
 
-userSchema.set('toJSON', { virtuals: true });
+// userSchema.pre('save', async function(next) {
+//   try {
+//     console.log('entered');
+//     if (this.method !== 'local') {
+//       next();
+//     }
+
+//     // Generate a salt
+//     const salt = await bcrypt.genSalt(10);
+//     // Generate a password hash (salt + hash)
+//     const passwordHash = await bcrypt.hash(this.local.password, salt);
+//     // Re-assign hashed version over original, plain text password
+//     this.local.password = passwordHash;
+//     console.log('exited');
+//     next();
+//   } catch(error) {
+//     next(error);
+//   }
+// });
+
+// userSchema.methods.isValidPassword = async function(newPassword) {
+//   try {
+//     return await bcrypt.compare(newPassword, this.local.password);
+//   } catch(error) {
+//     throw new Error(error);
+//   }
+// }
+
+// Create a model
+const User = mongoose.model('user', userSchema);
+
+// Export the model
+module.exports = User;
 
 
-module.exports = mongoose.model('User', userSchema);
 
 
 
@@ -44,27 +80,13 @@ module.exports = mongoose.model('User', userSchema);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Tested Code
 // const mongoose = require('mongoose');
 // const Schema = mongoose.Schema;
 
 // const userSchema = new Schema({
 //     email: { type: String, unique: true, required: true },
 //     hash: { type: String, required: true },
-    
+
 //     createdDate: { type: Date, default: Date.now }
 // });
 

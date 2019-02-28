@@ -13,5 +13,5 @@ mongoose.connect(config.connectionString,{ useNewUrlParser: true }).then(
 });
 
 module.exports = {
-    User: require('../users/user.model')
+    User: require('../_users/user.model')
 };
