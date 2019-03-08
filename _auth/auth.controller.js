@@ -7,6 +7,9 @@ const passportConf = require('../helpers/passport');
 
 const passportSignIn = passport.authenticate('local', { session: false });
 const passportJWT = passport.authenticate('jwt', { session: false });
+// const fbAuth= passport.authenticate('facebookToken', { session: false });
+const fbAuth= passport.authenticate('facebook-token', { session: false });
+const googleAuth= passport.authenticate('google-token', { session: false });
 
 const authService = require('./auth.service');
 const jwt = require('../helpers/jwt');
@@ -15,6 +18,10 @@ const jwt = require('../helpers/jwt');
 router.post('/register', register );
 
 router.post('/authenticate',passportSignIn, authenticate);
+router.post('/oauth/facebook',fbAuth, fbOAuth);
+router.post('/oauth/google',googleAuth, googleOAuth);
+
+
 
 
 
@@ -44,10 +51,6 @@ async function register(req, res, next) {
 }
 
 
-
-
-
-
 async function authenticate(req, res, next) {
 
     
@@ -58,6 +61,34 @@ async function authenticate(req, res, next) {
             }))
         .catch(err => next(err));
 }
+
+
+
+
+async function fbOAuth(req, res, next) {
+    console.log(`fb user from controller layer ${req.user}`)
+
+    await authService.fbOAuth(req.user)
+        .then(userData => userData ?
+            res.json(userData) : res.status(400).json({
+                message: 'Something is went wrong !'
+            }))
+        .catch(err => next(err));
+}
+
+async function googleOAuth(req, res, next) {
+
+    console.log(` google user from controller layer => ${req.user}`)
+    await authService.googleOAuth(req.user)
+        .then(userData => userData ?
+            res.json(userData) : res.status(400).json({
+                message: 'Something is went wrong !'
+            }))
+        .catch(err => next(err));
+}
+
+
+
 
 
 async function getCurrent(req, res, next) {

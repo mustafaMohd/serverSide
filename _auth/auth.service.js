@@ -5,11 +5,10 @@ const db = require('../helpers/db');
 const User = db.User;
 
 
-
-
-
 module.exports = {
     authenticate,
+    fbOAuth,
+    googleOAuth,
     getById,
     create,
     update,
@@ -86,19 +85,48 @@ delete user.local.password;
 }
 
 
-// async function authenticate({ email, password }) {
-//     const user = await User.findOne({ "local.email": email });
 
-//     if (user && bcrypt.compareSync(password, user.local.password)) {
-//         const { password, ...userWithoutPassword } = user.local.toObject();
 
-//         const token = jwt.sign({ sub: user.id }, config.JWT_SECRET);
-//         return {
-//             ...userWithoutPassword,
-//             token
-//         };
-//     }
-// }
+async function fbOAuth(user) {
+    console.log(`facebook user from service layer ${user}`)
+
+    const token = jwt.sign({
+        sub: user.id
+    }, config.JWT_SECRET);
+
+
+   
+user= user.toObject();
+    return {
+        user,
+        token
+    };
+}
+
+
+async function googleOAuth(user) {
+
+console.log(`google user from service layer ${user}`)
+    
+const token = jwt.sign({
+        sub: user.id
+    }, config.JWT_SECRET);
+
+
+   
+user= user.toObject();
+    return {
+        user,
+        token
+    };
+}
+
+
+
+
+
+
+
 
 
 
@@ -107,32 +135,7 @@ async function getById(id) {
     return await User.findById(id).select('-hash');
 }
 
-async function googleOAuth(req, res, next) {
-    // Generate token
-    var user = req.user;
-    const token = jwt.sign({
-        sub: user.id
-    }, config.JWT_SECRET);
-    return {
-        token
-    };
 
-}
-
-async function facebookOAuth(req, res, next) {
-    // Generate token
-    var user = req.user;
-
-    const token = jwt.sign({
-        sub: user.id
-    }, config.JWT_SECRET);
-
-
-
-    return {
-        token
-    };
-}
 
 
 
@@ -162,3 +165,30 @@ async function update(id, userParam) {
 async function _delete(id) {
     await User.findByIdAndRemove(id);
 }
+
+
+// async function googleOAuth(req, res, next) {
+//     // Generate token
+//     var user = req.user;
+//     const token = jwt.sign({
+//         sub: user.id
+//     }, config.JWT_SECRET);
+//     return {
+//         token
+//     };
+
+// }
+// async function facebookOAuth(req, res, next) {
+//     // Generate token
+//     var user = req.user;
+
+//     const token = jwt.sign({
+//         sub: user.id
+//     }, config.JWT_SECRET);
+
+
+
+//     return {
+//         token
+//     };
+// }
