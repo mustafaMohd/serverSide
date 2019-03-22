@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const jwt = require('./helpers/jwt');
 const errorHandler = require('./helpers/error-handler');
 const helmet = require('helmet');
 const passport=require('passport');
@@ -38,9 +37,9 @@ app.use(errorHandler);
 // start server
 const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 3000;
 
-var httpsServer = https.createServer(credentials, app);
+// var httpsServer = https.createServer(credentials, app);
 
-httpsServer.listen(port, function () {
-    console.log('Server listening on port ' + port);
-    console.log('https://localhost:3000');    
-});
+// httpsServer.listen(port, function () {
+//     console.log('Server listening on port ' + port);
+//     console.log('https://localhost:3000');    
+// });

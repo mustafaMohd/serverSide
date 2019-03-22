@@ -16,8 +16,12 @@ const jwt = require('../helpers/jwt');
 // routes
 
 router.post('/register', register );
+router.get('/logout',logout);
 
 router.post('/authenticate',passportSignIn, authenticate);
+
+
+
 router.post('/oauth/facebook',fbAuth, fbOAuth);
 router.post('/oauth/google',googleAuth, googleOAuth);
 
@@ -49,6 +53,24 @@ async function register(req, res, next) {
             next(err)
         });
 }
+
+async function logout(req, res, next) {
+    console.log(req.user)
+req.logout();
+if(!req.user){
+    res.status(200).json({
+        message: ` successfully logout`
+    }) 
+    
+}else
+res.status(400).json({
+    message: `logout failed`
+}) 
+    
+
+}
+
+
 
 
 async function authenticate(req, res, next) {
