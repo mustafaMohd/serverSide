@@ -3,10 +3,7 @@ const router = express.Router();
 const userService = require('./user.service');
 const jwt=require('../helpers/jwt');
 // routes
-router.post('/authenticate', authenticate);
-router.post('/register', register);
-router.get('/', jwt(), getAll);
-router.get('/current', jwt(), getCurrent);
+
 router.get('/:id', getById);
 router.put('/:id', jwt(), update);
 router.delete('/:id',jwt(), _delete);
@@ -16,51 +13,45 @@ module.exports = router;
  
 
 
-async function authenticate(req, res, next) {
-    userService.authenticate(req.body)
-        .then(user => user 
-            ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
-        .catch(err => next(err));
-}
 
-async function register(req, res, next) {
-   console.log(req.body)
-   userService.create(req.body)
-          .then(user => user 
-        ? res.json({}) : res.status(400).json({ message: ` Registeration Failed` }))
-    .catch(err => 
-        { 
-            console.log(err)
-            next(err)
-        });
-}
 
-function getAll(req, res, next) {
-    userService.getAll()
-        .then(users => res.json(users))
-        .catch(err => next(err));
-}
+async function getById(req, res, next) {
+    const currentUser = req.user;
+    const id = parseInt(req.params.id);
 
-function getCurrent(req, res, next) {
-    userService.getById(req.user.sub)
+    // only allow admins to access other user records
+    if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+
+    await userService.getById(req.params.id)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }
 
-function getById(req, res, next) {
-    userService.getById(req.params.id)
-        .then(user => user ? res.json(user) : res.sendStatus(404))
-        .catch(err => next(err));
-}
+async function update(req, res, next) {
+    const currentUser = req.user;
+    const id = parseInt(req.params.id);
 
-function update(req, res, next) {
+    // only allow admins to access other user records
+    if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     userService.update(req.params.id, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
 
-function _delete(req, res, next) {
-    userService.delete(req.params.id)
+async  function _delete(req, res, next) {
+    const currentUser = req.user;
+    const id = parseInt(req.params.id);
+
+    // only allow admins to access other user records
+    if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    await userService.delete(req.params.id)
         .then(() => res.json({}))
         .catch(err => next(err));
 }

@@ -12,11 +12,10 @@ const fbAuth= passport.authenticate('facebook-token', { session: false });
 const googleAuth= passport.authenticate('google-token', { session: false });
 
 const authService = require('./auth.service');
-const jwt = require('../helpers/jwt');
+
 // routes
 
 router.post('/register', register );
-router.get('/logout',logout);
 
 router.post('/authenticate',passportSignIn, authenticate);
 
@@ -31,6 +30,8 @@ router.post('/oauth/google',googleAuth, googleOAuth);
 
 router.get('/current', passportJWT, getCurrent);
 
+router.put('/edit:id', passportJWT, update);
+router.delete('/:id',passportJWT, _delete);
 
 
 module.exports = router;
@@ -52,23 +53,9 @@ async function register(req, res, next) {
             console.log(err)
             next(err)
         });
-}
 
-async function logout(req, res, next) {
-    console.log(req.user)
-req.logout();
-if(!req.user){
-    res.status(200).json({
-        message: ` successfully logout`
-    }) 
-    
-}else
-res.status(400).json({
-    message: `logout failed`
-}) 
-    
+    }
 
-}
 
 
 
@@ -114,20 +101,43 @@ async function googleOAuth(req, res, next) {
 
 
 async function getCurrent(req, res, next) {
- await authService.getById(req.user.sub)
+ 
+    await authService.getById(req.user.sub)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }
 
 
-// function update(req, res, next) {
-//     userService.update(req.params.id, req.body)
-//         .then(() => res.json({}))
-//         .catch(err => next(err));
-// }
+async function update(req, res, next) {
+    const currentUser = req.user;
+    const id = parseInt(req.params.id);
 
-// function _delete(req, res, next) {
-//     userService.delete(req.params.id)
-//         .then(() => res.json({}))
-//         .catch(err => next(err));
-// }
+    // only allow admins to access other user records
+    //if (id !== currentUser.sub && currentUser.role !== Role.Admin)
+    // only allow admins to access other user records
+    
+    if (id !== currentUser.sub ) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+   await userService.update(req.params.id, req.body)
+        .then(user => user ? res.json(user) : res.status(404).json({
+                message: 'Something is went wrong !'
+            }))
+        .catch(err => next(err));
+}
+ 
+
+async function _delete(req, res, next) {
+    const currentUser = req.user;
+    const id = parseInt(req.params.id);
+    if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+
+    await authService.delete(req.params.id)
+        .then(user => user ? res.json(user) : res.status(404).json({
+            message: 'Something is went wrong !'
+        }))
+        .catch(err => next(err));
+}

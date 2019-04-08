@@ -2,38 +2,25 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  method: {
-    type: String,
-    enum: ['local', 'google', 'facebook'],
-    required: true
-  },
+  method: {type: String, enum: ['local', 'google', 'facebook'],required: true},
+  fullname: {type:String, required:false},
   local: {
-    email: {
-      type: String,
-      lowercase: true
-    },
-    password: {
-      type: String
-    }
+    email: {  type: String,lowercase: true},
+    password: {type: String}
   },
-  google: {
-    id: {
-      type: String
-    },
-    email: {
-      type: String,
-      lowercase: true
-    }
+  google: {  id: {type: String},
+    email: {type: String,lowercase: true}
   },
-  facebook: {
-    id: {
-      type: String
-    },
-    email: {
-      type: String,
-      lowercase: true
-    }
-  }
+facebook: {id: {type: String},
+  email: {type: String,lowercase: true}
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  roles: [{
+    type: String,
+  }]
 });
 
 // userSchema.pre('save', async function(next) {

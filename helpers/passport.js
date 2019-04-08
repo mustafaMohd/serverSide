@@ -121,7 +121,9 @@ passport.use(new LocalStrategy({
   
   
     
-     } catch(error) {
+     } 
+     catch(error) 
+     {
     done(error, false);
   }
 }));
