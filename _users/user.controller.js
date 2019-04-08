@@ -49,7 +49,7 @@ async  function _delete(req, res, next) {
 
     // only allow admins to access other user records
     if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: 'Unauthorized !' });
     }
     await userService.delete(req.params.id)
         .then((user) => res.json({}))
