@@ -90,7 +90,7 @@ const token = await generateToken(user);
 
 
 async function fbOAuth(user) {
-    console.log(`facebook user from service layer ${user}`)
+    // console.log(`facebook users from service layer ${user}`)
     const token = await generateToken(user);
 
     // const token = jwt.sign({
