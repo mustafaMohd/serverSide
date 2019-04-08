@@ -52,6 +52,6 @@ async  function _delete(req, res, next) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
     await userService.delete(req.params.id)
-        .then(() => res.json({}))
+        .then((user) => res.json({}))
         .catch(err => next(err));
 }
