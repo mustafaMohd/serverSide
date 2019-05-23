@@ -10,22 +10,33 @@ const bcrypt = require('bcryptjs');
 
 // JSON WEB TOKENS STRATEGY
 passport.use(new JwtStrategy({
-  jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+ 
+  
+   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+   
+  //jwtFromRequest:ExtractJwt.fromAuthHeaderWithScheme('Authorization'),
+  //jwtFromRequest: ExtractJwt.fromHeader('authorization'),
   secretOrKey: config.JWT_SECRET
 }, async (payload, done) => {
   try {
     // Find the user specified in token
-    const user = await User.findById(payload.sub);
+// const user = await User.findById(payload.sub);
+   
 
+const user = await User.findOne({_id:payload.sub});
+   
     // If user doesn't exists, handle it
     if (!user) {
+      console.log('from Jwt passport user not found'); 
+
       return done(null, false);
     }
-
+    console.log('from Jwt passport'+user); 
     // Otherwise, return the user
-    done(null, user);
+    //req.user = user;
+    return done(null, user);
   } catch(error) {
-    done(error, false);
+   return done(error, false);
   }
 }));
 
@@ -47,9 +58,13 @@ passport.use('google-token', new GooglePlusTokenStrategy({
 
     const newUser = new User({
       method: 'google',
+      email: profile.emails[0].value,
+      fullname: profile.displayName
+   
+      ,
       google: {
         id: profile.id,
-        email: profile.emails[0].value
+        // email: profile.emails[0].value
       }
     });
 
@@ -76,9 +91,11 @@ passport.use('facebook-token',new FacebookTokenStrategy({
 
     const newUser = new User({
       method: 'facebook',
+      email: profile.emails[0].value,
+      fullname: profile.displayName,
       facebook: {
         id: profile.id,
-        email: profile.emails[0].value
+        // email: profile.emails[0].value
       }
     });
 
@@ -97,8 +114,8 @@ passport.use(new LocalStrategy({
 }, async (email, password, done) => {
   try {
     // Find the user given the email
-    const user = await User.findOne({ "local.email": email });
-    
+    const user = await User.findOne({  "email": email });
+console.log('from passport'+user)    
     // If not, handle it
     if (!user) {
       return done(null, false);
@@ -127,3 +144,4 @@ passport.use(new LocalStrategy({
     done(error, false);
   }
 }));
+module.exports = passport;

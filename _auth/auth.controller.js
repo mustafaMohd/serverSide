@@ -13,6 +13,8 @@ const googleAuth= passport.authenticate('google-token', { session: false });
 
 const authService = require('./auth.service');
 
+const requireUser = require('./../middleware/isUser');
+
 // routes
 
 router.post('/register', register );
@@ -26,11 +28,12 @@ router.post('/oauth/google',googleAuth, googleOAuth);
 
 
 
-
+router.post('/update',passportJWT, update);
 
 router.get('/current', passportJWT, getCurrent);
 
-router.put('/edit:id', passportJWT, update);
+//router.get('/:id', getById);
+
 router.delete('/:id',passportJWT, _delete);
 
 
@@ -62,7 +65,8 @@ async function register(req, res, next) {
 
 async function authenticate(req, res, next) {
 
-    
+
+console.log("from controller "+req.user.id);    
     await authService.authenticate(req.user)
         .then(userData => userData ?
             res.json(userData) : res.status(400).json({
@@ -98,28 +102,35 @@ async function googleOAuth(req, res, next) {
 
 
 
-
+async function getById(req, res, next) {
+ 
+    await authService.getById(req.params.id)
+        .then(user => user ? res.json(user) : res.sendStatus(404))
+        .catch(err => next(err));
+}
 
 async function getCurrent(req, res, next) {
- 
-    await authService.getById(req.user.sub)
+ console.log("from auth getcurrent "+req.user._id);
+    await authService.getById(req.user._id)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }
 
 
 async function update(req, res, next) {
-    const currentUser = req.user;
-    const id = parseInt(req.params.id);
-
-    // only allow admins to access other user records
-    //if (id !== currentUser.sub && currentUser.role !== Role.Admin)
-    // only allow admins to access other user records
+    //const currentUser = req.user;
+//     const id = parseInt(req.params.id);
+// console.log(id);
+//     // only allow admins to access other user records
+//     //if (id !== currentUser.sub && currentUser.role !== Role.Admin)
+//     // only allow admins to access other user records
     
-    if (id !== currentUser.sub ) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
-   await userService.update(req.params.id, req.body)
+//     if (id !== req.user.sub ) {
+//         return res.status(401).json({ message: 'Unauthorized' });
+//     }
+    console.log(req.user)
+    
+   await authService.update(req.user._id, req.body)
         .then(user => user ? res.json(user) : res.status(404).json({
                 message: 'Something is went wrong !'
             }))
@@ -129,8 +140,8 @@ async function update(req, res, next) {
 
 async function _delete(req, res, next) {
     const currentUser = req.user;
-    const id = parseInt(req.params.id);
-    if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
+    const id = parseInt(currentUser._id);
+    if (id !== currentUser.sub || currentUser.role !== Role.Admin) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 

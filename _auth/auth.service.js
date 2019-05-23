@@ -20,7 +20,7 @@ async function create(userParam) {
     console.log(userParam)
 
     if (await User.findOne({
-            "local.email": userParam.email
+            "email": userParam.email
         })) {
         throw 'Email "' + userParam.email + '"  already exists';
     }
@@ -28,7 +28,7 @@ async function create(userParam) {
     const newUser = new User({
         method: 'local',
         fullname: userParam.fullname,
-            
+          email: userParam.email  
     
     });
 
@@ -128,12 +128,43 @@ async function googleOAuth(user) {
 
 
 
+async function update( id,userParam) {
+    // const id=req.user._id;
+    console.log(` from service ${id}`);
 
 
+    let edituser = await User.findById(id);
+    
+    // validate
+    if (!edituser) throw 'User not found';
+    
+        if (edituser.email !== userParam.email && await User.findOne({ "email": userParam.email })) {
+            throw 'Email "' + userParam.email + '" is already registered';
+        }
+        edituser.email=userParam.email;
+        edituser.fullname= userParam.fullname;
+        edituser.updatedAt= Date.now();
+        let user= await edituser.save();  
+        user = user.toObject(); 
+        if (user.method==='local'){
+            
+    delete user.local.password;
+    delete user.roles;
+
+        }
+        const token = await generateToken(user);
+    // delete updatedUser.local.password;
+        
+        return {
+            user,
+            token
+        }    
+
+    }
 
 async function generateToken(user){
     return jwt.sign({
-        sub: user.id
+        sub: user._id
     }, config.JWT_SECRET,{ expiresIn: 60 * 60 * 24 * 7 })
 
 }
@@ -148,98 +179,13 @@ async function getById(id) {
 }
 
 
-async function update(id, userParam) {
-   
-    const user = await User.findById(id);
-    
-    // validate
-    if (!user) throw 'User not found';
-    user.fullname= userParam.fullname;
-    if (user.method.local){
-        if (user.local.email !== userParam.email && await User.findOne({ "local.email": userParam.email })) {
-            throw 'Email "' + userParam.email + '" is already registered';
-        }
-        user.local.email=userParam.email;
-        
-    let updatedUser= await user.save();
-    }
-    user.fullname= userParam.fullname;
-   if(user.method.facebook){
-    if (user.facebook.email !== userParam.email && await User.findOne({ "facebook.email": userParam.email })) {
-        throw 'Username "' + userParam.email + '" is already taken';
-    }
-    user.facebook.email=userParam.email;
-    user.fullname= userParam.fullname;
-    let updatedUser= await user.save();
-
-   } 
-   if(user.method.google){
-   
-    user.fullname= userParam.fullname;
-   if (user.google.email !== userParam.email && await User.findOne({ 'google.email': userParam.email })) {
-        throw 'Username "' + userParam.email + '" is already taken';
-    }
-    user.google.email=userParam.email;
-    
-    let updatedUser= await user.save();
 
 
-}
-const token = await generateToken(user);
-return { updatedUser ,token}
-}
 
 async function _delete(id) {
     return  await User.findByIdAndRemove(id);
 }
 
 
-// async function update(id, userParam) {
-//     const user = await User.findById(id);
-
-//     // validate
-//     if (!user) throw 'User not found';
-//     if (user.email !== userParam.email && await User.findOne({
-//             email: userParam.email
-//         })) {
-//         throw 'Email "' + userParam.email + '" is already taken';
-//     }
-
-//     // hash password if it was entered
-//     if (userParam.password) {
-//         userParam.hash = bcrypt.hashSync(userParam.password, 10);
-//     }
-
-//     // copy userParam properties to user
-//     Object.assign(user, userParam);
-
-//     await user.save();
-// }
 
 
-
-// async function googleOAuth(req, res, next) {
-//     // Generate token
-//     var user = req.user;
-//     const token = jwt.sign({
-//         sub: user.id
-//     }, config.JWT_SECRET);
-//     return {
-//         token
-//     };
-
-// }
-// async function facebookOAuth(req, res, next) {
-//     // Generate token
-//     var user = req.user;
-
-//     const token = jwt.sign({
-//         sub: user.id
-//     }, config.JWT_SECRET);
-
-
-
-//     return {
-//         token
-//     };
-// }

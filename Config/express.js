@@ -5,20 +5,21 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const errorHandler = require('../helpers/error-handler');
 const helmet = require('helmet');
-const passport = require('passport');
+const passport = require('../helpers/passport');
 
 
 
 
 
 app.use(bodyParser.urlencoded({
-    extended: false
+    extended: true
 }));
+
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(cors());
 app.use(passport.initialize());
-var distDir ='../../ClientSide/dist/ClientSide/'; 
+var distDir ='../../ClientSide/dist/ClientSide'; 
 app.use(express.static(path.join(__dirname, distDir)))
 app.use(/^((?!(api)).)*/, (req, res) => {
   res.sendFile(path.join(__dirname, distDir + '/index.html'));
