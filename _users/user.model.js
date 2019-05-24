@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+ 
   method: {type: String, enum: ['local', 'google', 'facebook'],required: true},
   fullname: {type:String, required:false},
   email: {type: String,lowercase: true}

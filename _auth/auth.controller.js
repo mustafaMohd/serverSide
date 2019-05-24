@@ -29,10 +29,10 @@ router.post('/oauth/google',googleAuth, googleOAuth);
 
 
 router.post('/update',passportJWT, update);
-
+router.post('/changePassword',passportJWT, changePassword);
 router.get('/current', passportJWT, getCurrent);
 
-//router.get('/:id', getById);
+// router.get('/:id', getById);
 
 router.delete('/:id',passportJWT, _delete);
 
@@ -102,12 +102,12 @@ async function googleOAuth(req, res, next) {
 
 
 
-async function getById(req, res, next) {
+// async function getById(req, res, next) {
  
-    await authService.getById(req.params.id)
-        .then(user => user ? res.json(user) : res.sendStatus(404))
-        .catch(err => next(err));
-}
+//     await authService.getById(req.params.id)
+//         .then(user => user ? res.json(user) : res.sendStatus(404))
+//         .catch(err => next(err));
+// }
 
 async function getCurrent(req, res, next) {
  console.log("from auth getcurrent "+req.user._id);
@@ -118,19 +118,21 @@ async function getCurrent(req, res, next) {
 
 
 async function update(req, res, next) {
-    //const currentUser = req.user;
-//     const id = parseInt(req.params.id);
-// console.log(id);
-//     // only allow admins to access other user records
-//     //if (id !== currentUser.sub && currentUser.role !== Role.Admin)
-//     // only allow admins to access other user records
-    
-//     if (id !== req.user.sub ) {
-//         return res.status(401).json({ message: 'Unauthorized' });
-//     }
+  
+    console.log('from COntroller '+req.user)
+    const Id=req.user.id;
+    console.log(Id)
+   await authService.update(Id, req.body)
+        .then(user => user ? res.json(user) : res.status(404).json({
+                message: 'Something is went wrong !'
+            }))
+        .catch(err => next(err));
+}
+async function changePassword(req, res, next) {
+  
     console.log(req.user)
     
-   await authService.update(req.user._id, req.body)
+   await authService.changePassword(req.user.id, req.body)
         .then(user => user ? res.json(user) : res.status(404).json({
                 message: 'Something is went wrong !'
             }))
