@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 mongoose.set('useCreateIndex', true);
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.connectionString,{ useNewUrlParser: true }).then(
+mongoose.connect(config.connectionString,{ useNewUrlParser: true ,useUnifiedTopology: true}).then(
     () => { 
         console.log(`connected to DB with String ${config.connectionString}` )
     /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ 
@@ -13,5 +13,6 @@ mongoose.connect(config.connectionString,{ useNewUrlParser: true }).then(
 });
 
 module.exports = {
-    User: require('../_users/user.model')
+    User: require('../_models/user.model'),
+    
 };

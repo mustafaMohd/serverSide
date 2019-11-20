@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 const errorHandler = require('../helpers/error-handler');
 const helmet = require('helmet');
 const passport = require('../helpers/passport');
+const passportJWT = passport.authenticate('jwt', { session: false });
+
+
 
 
 
@@ -34,7 +37,7 @@ app.use(/^((?!(api)).)*/, (req, res) => {
 // app.use('/post', require('./users/user.controller'));
 app.use('/api/auth', require('../_auth/auth.controller'));
 
-app.use('/api/users', require('../_users/user.controller'));
+app.use('/api/admin/users',passportJWT, require('../_admin/user/user.controller'));
 
 // global error handler
 app.use(errorHandler);

@@ -2,7 +2,11 @@ const config = require('../Config/config.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../helpers/db');
+
+const Role = require('../helpers/role');
 const User = db.User;
+
+
 
 
 module.exports = {
@@ -38,6 +42,7 @@ async function create(userParam) {
     if (userParam.password) {
         newUser.local.password = bcrypt.hashSync(userParam.password, 10);
         delete userParam.password;
+newUser.roles.push(Role.User);
 
     }
 
@@ -54,7 +59,7 @@ async function create(userParam) {
     user = user.toObject();
 
     delete user.local.password;
-    delete user.roles;
+    //delete user.roles;
 
 
     const token = await generateToken(user);
@@ -79,7 +84,7 @@ async function authenticate(user) {
 
     user = user.toObject();
     delete user.local.password;
-    delete user.roles;
+    // delete user.roles;
 
     return {
         user,
@@ -150,7 +155,7 @@ async function update(id, userParam) {
     if (user.method === 'local') {
 
         delete user.local.password;
-        delete user.roles;
+        // delete user.roles;
 
     }
     const token = await generateToken(user);
