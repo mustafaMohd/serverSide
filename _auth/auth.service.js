@@ -198,7 +198,8 @@ async function forgotPassword(email) {
     //         resetPasswordExpires: Date.now() + 3600000,
     //     }
     // ); 
-
+// Please enter your Gmail and your password
+// and also enter your Gmail and in mail options
     console.log(edituser);
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -208,7 +209,7 @@ async function forgotPassword(email) {
         },
     });
     const mailOptions = {
-        from: 'email@gmail.com',
+        from: 'fromYourEmail@gmail.com',
         to: `${edituser.email}`,
         subject: 'link to Reset Password',
         text:
