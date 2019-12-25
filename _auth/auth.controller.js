@@ -13,11 +13,13 @@ const googleAuth= passport.authenticate('google-token', { session: false });
 
 const authService = require('./auth.service');
 
-const requireUser = require('./../middleware/isUser');
+// const requireUser = require('./../middleware/isUser');
 
 // routes
 
 router.post('/register', register );
+router.post('/forgotPassword', forgotPassword);
+router.post('/resetPassword',resetPassword);
 
 router.post('/authenticate',passportSignIn, authenticate);
 
@@ -29,6 +31,7 @@ router.post('/oauth/google',googleAuth, googleOAuth);
 
 
 router.post('/update',passportJWT, update);
+
 router.post('/changePassword',passportJWT, changePassword);
 router.get('/current', passportJWT, getCurrent);
 
@@ -119,7 +122,8 @@ async function getCurrent(req, res, next) {
 
 async function update(req, res, next) {
   
-    console.log('from COntroller '+req.user)
+    console.log('from Auth Controller '+req.body.email)
+    
     const Id=req.user.id;
     console.log(Id)
    await authService.update(Id, req.body)
@@ -128,13 +132,34 @@ async function update(req, res, next) {
             }))
         .catch(err => next(err));
 }
-async function changePassword(req, res, next) {
-  
-    console.log(req.user)
+
+async function forgotPassword(req, res, next) {
     
-   await authService.changePassword(req.user.id, req.body)
+   await authService.forgotPassword(req.body.email)
         .then(user => user ? res.json(user) : res.status(404).json({
                 message: 'Something is went wrong !'
+            }))
+        .catch(err => next(err));
+}
+async function resetPassword(req, res, next) {
+    //const token = req.body.token;
+    
+    await authService.resetPassword( req.body.token, req.body.password)
+         .then(user => user ? res.json(user) : res.status(404).json({
+                 message: 'password not reset !'
+             }))
+         .catch(err => next(err));
+ }
+  
+
+
+async function changePassword(req, res, next) {
+    const Id=req.user.id;
+
+    
+   await authService.changePassword( Id,req.body)
+        .then(user => user ? res.json(user) : res.status(404).json({
+                message: 'email not found !'
             }))
         .catch(err => next(err));
 }

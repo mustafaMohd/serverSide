@@ -1,7 +1,10 @@
 const config = require('../Config/config.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const db = require('../helpers/db');
+const nodemailer = require('nodemailer');
+
 
 const Role = require('../helpers/role');
 const User = db.User;
@@ -17,6 +20,8 @@ module.exports = {
     create,
     update,
     changePassword,
+    forgotPassword,
+    resetPassword,
     delete: _delete
 };
 
@@ -42,7 +47,7 @@ async function create(userParam) {
     if (userParam.password) {
         newUser.local.password = bcrypt.hashSync(userParam.password, 10);
         delete userParam.password;
-newUser.roles.push(Role.User);
+        newUser.roles.push(Role.User);
 
     }
 
@@ -139,7 +144,7 @@ async function update(id, userParam) {
     console.log(` from service ${id}`);
 
 
-    let edituser = await User.findById({_id:id});
+    let edituser = await User.findById({ _id: id });
 
     // validate
     if (!edituser) throw 'User not found';
@@ -170,8 +175,80 @@ async function update(id, userParam) {
 
 
 
+async function forgotPassword(email) {
+    const user = await User.findOne({ email: email });
+
+    if (!user) throw 'User not found';
+    console.log(user)
+
+    if (!user.method === 'local') {
+        throw 'try social login please found';
+    }
+    const token = crypto.randomBytes(20).toString('hex');
+    console.log(token)
+    user.updatedAt = Date.now();
+    user.resetPasswordToken= token;
+    user.resetPasswordExpires= Date.now() + 7200000;
+        console.log(user.resetPasswordExpires)
+    
+    let edituser = await user.save();
+    
+    //     {
+    //         resetPasswordToken: token,
+    //         resetPasswordExpires: Date.now() + 3600000,
+    //     }
+    // ); 
+
+    console.log(edituser);
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'Enter your email',
+            pass: 'enter your password'
+        },
+    });
+    const mailOptions = {
+        from: 'mustafa312540@gmail.com',
+        to: `${edituser.email}`,
+        subject: 'link to Reset Password',
+        text:
+            ' you are receiving this because you (or someone else ) have requested for Reset Password for your account. \n\n'
+            + 'Please click this link \n\n'
+            + `https://localhost:3000/auth/resetPassword/${token}\n\n`
+            + 'you have not sent this email Please do not click you account password will remain unchanged \n\n'
+    }
+    return transporter.sendMail(mailOptions);
+    //return await user.save();
+
+}
 
 
+
+
+async function resetPassword(resetToken, password) {
+   
+   const editUser = await User.findOne({ resetPasswordToken: resetToken});
+    // validate
+    if (!editUser) throw 'Reset Link Invalid !!';
+    if (!editUser.resetPasswordExpires> Date.now() ) throw 'Expired !!';
+   
+    
+    editUser.local.password = bcrypt.hashSync(password, 10);
+    delete password;
+    editUser.updatedAt = Date.now();
+    let user = await editUser.save();
+  
+    user = user.toObject();
+    // if (user.method==='local'){
+
+    delete user.local.password;
+    delete user.roles;
+
+  
+
+    return {user}
+
+}
 
 
 

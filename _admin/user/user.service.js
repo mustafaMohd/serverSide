@@ -49,6 +49,12 @@ async function getAll() {
 async function getById(id) {
     return await User.findById(id);
 }
+
+
+
+
+
+
 async function update(id, userParam) {
     const user = await User.findById(id);
 
@@ -56,11 +62,11 @@ async function update(id, userParam) {
     if (!user) throw 'User not found';
 
     if (user.method.local) {
-        if (user.local.email !== userParam.email && await User.findOne({ "local.email": userParam.email })) {
+        if (user.email !== userParam.email && await User.findOne({ email: userParam.email })) {
             throw 'Email "' + userParam.email + '" is already registered';
         }
-        user.local.email = userParam.email;
-        user.local.fullname = userParam.fullname;
+        user.email = userParam.email;
+        user.fullname = userParam.fullname;
         return await user.save();
     }
 
