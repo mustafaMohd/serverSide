@@ -208,7 +208,7 @@ async function forgotPassword(email) {
         },
     });
     const mailOptions = {
-        from: 'mustafa312540@gmail.com',
+        from: 'email@gmail.com',
         to: `${edituser.email}`,
         subject: 'link to Reset Password',
         text:
