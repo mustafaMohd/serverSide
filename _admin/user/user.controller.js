@@ -31,8 +31,15 @@ async function add(req, res, next) {
 
 
 async function getAll(req, res, next) {
-console.log(" get all"); 
-    await userService.getAll()
+    const pageSize =    parseInt(+req.query.pageSize)
+    const currentPage =    parseInt(+req.query.page)
+
+    //const pageSize = +req.query.pageSize || 10;
+//const currentPage = +req.query.page || 1 ;
+const search= +req.query.filter;
+console.log(search)
+
+    await userService.getAll(currentPage,pageSize,search)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }

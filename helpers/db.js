@@ -1,6 +1,5 @@
 const config = require('../Config/config.js');
 const mongoose = require('mongoose');
-mongoose.set('useCreateIndex', true);
 mongoose.Promise = global.Promise;
 
 mongoose.connect(config.connectionString,{ useNewUrlParser: true ,useUnifiedTopology: true}).then(

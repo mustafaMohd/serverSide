@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-var mongoosePaginate = require('mongoose-paginate');
+const mongoosePaginate = require('mongoose-paginate');
 
 const userSchema = new Schema({
  
@@ -25,7 +25,8 @@ facebook: {id: {type: String},
   updatedAt: {
     type: Date,
     
-  },resetPasswordToken:{type:String, required:false},
+  },
+  resetPasswordToken:{type:String, required:false},
   resetPasswordExpires:{type:Date, required:false},  
   
   roles: [{
@@ -35,7 +36,7 @@ facebook: {id: {type: String},
 
 userSchema.plugin(mongoosePaginate);
 // Create a model
-const User = mongoose.model('user', userSchema);
+const User = mongoose.model('User', userSchema);
 
 // Export the model
 module.exports = User;
