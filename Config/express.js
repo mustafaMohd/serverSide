@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.use(cors());
 app.use(passport.initialize());
-var distDir ='../../ClientSide/dist/ClientSide'; 
+const distDir ='../../ClientSide/dist/ClientSide'; 
 app.use(express.static(path.join(__dirname, distDir)))
 app.use(/^((?!(api)).)*/, (req, res) => {
   res.sendFile(path.join(__dirname, distDir + '/index.html'));

@@ -47,7 +47,7 @@ async function create(userParam) {
     if (userParam.password) {
         newUser.local.password = bcrypt.hashSync(userParam.password, 10);
         delete userParam.password;
-        newUser.roles.push(Role.User);
+        //newUser.roles.push(Role.User);
 
     }
 
